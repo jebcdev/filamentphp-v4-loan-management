@@ -1,0 +1,233 @@
+Soy *JEBC-Dev* y necesito el diseño arquitectónico y funcional de un *Sistema Administrativo de Préstamos* (agnóstico a tecnologías). Lo usará una sola persona (administrador). El sistema debe permitir registrar clientes con todos sus datos, administrar cupos, generar y registrar préstamos con cuotas y frecuencia (semanal, quincenal, mensual), gestionar estados (pendiente, parcialmente pagado, pagado), calcular intereses, registrar pagos parciales, controlar saldo disponible por cliente y auditar todo. Agrega todo lo que falte y cualquier mejora razonable. Entregar diseño completo, especificaciones y ejemplos listos para implementar.
+
+ 1) Objetivo
+
+* Construir un sistema administrativo para gestionar préstamos personales/operativos.
+* Permitirá: gestionar clientes, cupos, originar préstamos, programar cuotas, registrar pagos, ver estados, reportes y auditoría.
+* Diseño debe ser *agnóstico a frameworks y lenguajes* (puede implementarse con Laravel, Node, Next, etc.).
+
+ 2) Actores
+
+* *Administrador* (único usuario del sistema): crea clientes, origina préstamos, registra pagos, consulta reportes y configura reglas de negocio.
+* (Opcional futuro) *Cliente*: solo para notificaciones o consulta de recibos — por ahora no requerido.
+
+ 3) Alcance funcional mínimo (MVP)
+
+1. *CRUD de Clientes*: registrar con todos los campos relevantes y documentos.
+2. *Gestión de Cupos*: asignar cupo máximo por cliente; ver cupo usado y disponible.
+3. *Originación de Préstamos*:
+
+   * Registrar monto, plazo (n° cuotas), frecuencia (semanal/quincenal/mensual), tasa de interés (fija o porcentual), fecha de inicio.
+   * Generar plan de cuotas automáticamente (número, fecha vencimiento, capital, interés, total cuota).
+4. *Gestión de Cuotas / Registro de Pagos*:
+
+   * Registrar pagos por cuota(s) o abonos al capital.
+   * Estado de cuota: Pendiente, Parcialmente pagado, Pagado.
+   * Estado del préstamo: Vigente / Activo, Parcialmente pagado, Liquidado (Pagado), Vencido / En mora.
+5. *Cupo disponible*:
+
+   * Al originar préstamo: reservar el monto en el cupo (disminuye cupo disponible).
+   * Al pagar/ cancelar préstamo: liberar cupo.
+6. *Reglas de cobranza y penalizaciones* (configurables): mora, intereses de mora, días de gracia.
+7. *Reportes básicos*: cartera vigente, cartera vencida, movimientos por cliente, saldo por cliente, próximos vencimientos.
+8. *Auditoría y logs*: historial de cambios por entidad con fecha, usuario y razón.
+9. *Seguridad*: autenticación (único admin), roles mínimos, validaciones.
+10. *Importación / Exportación*: CSV/Excel para clientes y préstamos.
+11. *Backups y recuperación* (alto nivel).
+
+ 4) Requisitos no funcionales
+
+* *Agnóstico a tecnología* (OBLIGATORIO MANEJARLO PARA IMPLEMENTAR A FUTURO BASES DE DATOS RELACIONALES).
+* *Escalable*: diseño que permita crecer (más usuarios, más volumen).
+* *Consistencia financiera*: todas operaciones que modifiquen saldos deben ser atómicas.
+* *Trazabilidad*: registrar quién hizo qué y cuándo.
+* *Disponibilidad* alta para operaciones críticas; backup diario.
+* *Internacionalizable* (soporte moneda, formato fechas).
+* *Seguridad*: cifrado en tránsito, hashing de credenciales, mínimos permisos.
+* *Performance*: queries de reportes optimizadas (índices sugeridos).
+
+ 5) Modelo de datos (entidades principales — campos sugeridos)
+
+> Nota: mantener tipos genéricos (string, decimal, integer, date, enum). Puedes mapear a SQL/NoSQL.
+
+ Cliente
+
+* id (incremental)
+* nombre_completo
+* tipo_documento (CC, CE, NIT, etc.)
+* documento
+* fecha_nacimiento (opcional)
+* direccion
+* ciudad
+* telefono
+* correo_electronico
+* genero (opcional)
+* ocupacion
+* ingreso_mensual (opcional)
+* cupo_maximo (decimal)
+* cupo_usado (decimal) — calculable, pero guardable para rendimiento
+* estado (activo, inactivo)
+* metadata / notas
+* audit: creado_por, creado_en, modificado_por, modificado_en
+
+ Prestamo
+
+* id
+* cliente_id (FK)
+* codigo (string, único) — ej: PRE-2025-0001
+* monto_original (decimal)
+* moneda
+* tasa_interes_porcentaje (decimal) — tasa nominal por periodo o anual (definir)
+* tipo_interes (nominal_anual, fijo_monto, tasa_por_periodo)
+* cuotas_count (integer)
+* frecuencia_pago (enum: semanal, quincenal, mensual)
+* fecha_inicio
+* fecha_primer_vencimiento
+* saldo_capital (decimal)
+* saldo_total (capital + intereses pendientes)
+* estado (activo, parcialmente_pagado, pagado, vencido)
+* penalidad_mora (configurable)
+* notas
+* audit: creado_por, creado_en, modificado_por, modificado_en
+
+ Cuota (installment)
+
+* id
+* prestamo_id
+* numero_cuota (1..N)
+* fecha_vencimiento
+* capital (decimal)
+* interes (decimal)
+* monto_total (capital + interes + otros)
+* monto_pagado (decimal)
+* estado (pendiente, parcialmente_pagado, pagado, reprogramado)
+* fecha_pago (de la cuota, si aplica)
+* audit
+
+ Pago (transaction)
+
+* id
+* prestamo_id (opcional, si es pago directo a cuota)
+* cuota_id (opcional - si pago aplica a cuota específica)
+* cliente_id
+* fecha_pago
+* monto (decimal)
+* metodo_pago (efectivo, transferencia, etc.)
+* aplicacion (a_capital, a_interes, pago_cuota)
+* referencia_externa
+* notas
+* audit
+
+ Configuración (global)
+
+* tasa_mora_porcentaje
+* dias_gracia
+* politicas_redondeo
+* formatos_fecha
+
+ 6) Relaciones
+
+* Cliente 1 — N Prestamo
+* Prestamo 1 — N Cuota
+* Prestamo 1 — N Pago (o Pago asociado a Cuota)
+* Cliente 1 — N Pago (pagos recibidos)
+
+ 7) Reglas de negocio / cálculos clave
+
+* *Cálculo de interés*:
+
+  * Definir si la tasa es anual o por periodo. Ejemplo: si vas a usar tasa nominal anual para cuotas mensuales: `i_periodo = tasa_anual / 12`.
+  * Fórmula para cuota fija (sistema francés):
+    cuota = P * (i * (1+i)^n) / ((1+i)^n - 1)
+  * Opción: cuotas de interés fijo + amortización capital (lineal).
+* *Reserva de cupo*: Al crear préstamo, sumar `monto_original` a `cupo_usado`. Rechazar si supera `cupo_maximo`.
+* *Aplicación de pagos*: Por defecto aplicar a intereses vencidos → capital → siguientes cuotas; permitir abono a capital explícito.
+* *Pagos parciales*: Si el pago es menor que la cuota, marcar cuota como `parcialmente_pagado` con monto_pagado parcial y generar saldo restante.
+* *Cierre anticipado*: permitir liquidación anticipada; recalcular intereses y posibles descuentos o cargos según política.
+* *Mora*: cuando fecha_vencimiento + dias_gracia < hoy y cuota no pagada → aplicar tasa_mora sobre saldo pendiente; cambiar estado a `vencido`.
+* *Reprogramación*: permitir reprogramar cuotas (crear nueva estructura o actualizar fechas) y registrar historial.
+* *Validaciones*: monto > 0, cuotas >=1, frecuencia válida, cliente activo, cupo disponible.
+
+ 8) Flujo de procesos (paso a paso)
+
+ 8.1 Originación de préstamo
+
+1. Admin selecciona cliente o crea nuevo.
+2. Admin solicita monto, plazo, frecuencia, tasa, fecha inicio.
+3. Sistema valida cupo disponible.
+4. Sistema calcula plan de amortización y muestra tabla de cuotas (capital, interés, fechas, totales).
+5. Admin confirma → sistema crea préstamo y cuotas; actualiza `cupo_usado`.
+6. Log de creación.
+
+ 8.2 Registro de pago
+
+1. Admin registra pago indicando préstamo/cuota y monto.
+2. Sistema aplica pago según política (intereses vencidos → capital).
+3. Actualiza `monto_pagado` en cuota(s), recalcula `saldo_capital` y `saldo_total` en préstamo.
+4. Si préstamo queda con saldo 0 → estado `pagado` → liberar `cupo_usado`.
+5. Log de pago y recibo (PDF/JSON).
+
+ 8.3 Generación de vencimientos recurrentes
+
+* Al originar se generan cuotas con fechas basadas en frecuencia. Para quincenal considerar 15 días o 2 por mes: definir regla clara.
+
+ 8.4 Manejo de mora y cobranza
+
+* Cron job (o proceso manual) que:
+
+  * Recalcula estado de cuotas según fechas.
+  * Marca cuotas como `vencido` y aplica intereses de mora.
+  * Genera alertas y reportes de cartera vencida.
+
+ 9) Estados (máquina de estados simplificada)
+
+ Préstamo
+
+* BORRADOR → ACTIVO → PARCIALMENTE_PAGADO → PAGADO → VENCIDO
+  Transitions: create → activar; pagos → parcial/pagado; fechas → vencido; reprogramación → volver activo
+
+ Cuota
+
+* PENDIENTE → PARCIALMENTE_PAGADO → PAGADO → REPROGRAMADO → VENCIDO
+
+ 10) Esquema de base de datos (SQL genérico — resumen)
+
+* Tablas: clientes, prestamos, cuotas, pagos, audit_logs, config
+* Índices: clientes(documento), prestamos(cliente_id), cuotas(prestamo_id, fecha_vencimiento), pagos(prestamo_id, fecha_pago)
+* Constraints: FK, NOT NULL en campos críticos, unique en codigo de préstamo.
+
+ 11) UI / UX (pantallas clave)
+
+* Dashboard: resumen cartera, próximos vencimientos, alertas.
+* Clientes: lista + ficha detallada (historial de préstamos y pagos).
+* Nuevo Préstamo: formulario + preview plan de cuotas (tabla editable).
+* Préstamos: lista con filtros y acciones (ver, pagar, reprogramar).
+* Cuotas: vista por préstamo con botones “registrar pago” por cuota.
+* Pagos: pantalla de registro rápido (buscar cliente o préstamo).
+* Reportes & Exportación.
+* Configuración: tasas, penalidades, días de gracia.
+
+ 12) Seguridad & control de acceso
+
+* Autenticación segura (2FA opcional).
+* Solo el administrador tiene acceso: single-user role.
+* Registros de sesión, bloqueo tras X intentos.
+* Encriptación de datos sensibles (documentos, emails si es requerido).
+* Backups periódicos y exportaciones.
+
+ 13) Monitoring y alertas (sugerido)
+
+* Métricas: nro. préstamos activos, cartera vencida, pagos diarios, errores API.
+* Alertas: cartera vencida > X, backup fallido, errores de cron de generación de mora.
+
+ 14) Criterios de aceptación (ejemplos)
+
+* Crear cliente con datos obligatorios → se almacena y aparece en la lista.
+* Originar préstamo dentro del cupo → cuotas generadas y cupo actualizado.
+* Registrar pago parcial → cuota queda `parcialmente_pagado`, saldo recalculado.
+* Liquidar préstamo → estado `pagado` y cupo liberado.
+* Rechazo de préstamo si supera cupo_maximo.
+
+ 15) Prioridades (MVP vs futuras mejoras)
+
+*MVP*: Clientes CRUD, originar préstamos con plan automático, registrar pagos, cupo control, reportes básicos, auditoría mínima.
