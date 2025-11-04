@@ -29,8 +29,29 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Emerald,
             ])
+
+            /* Mi Personalizacion */
+             ->favicon(asset('assets/img/logo.png'))
+            ->darkMode(true)
+            ->sidebarCollapsibleOnDesktop()
+            ->brandLogo(asset('assets/img/logo.png'))
+            ->brandLogoHeight("2.5rem")
+
+             // links de navegación en el menú
+            ->navigationItems([
+                \Filament\Navigation\NavigationItem::make('WhatsApp')
+                    ->url('https://wa.me/573052850514', shouldOpenInNewTab: true)
+                    ->icon('heroicon-o-chat-bubble-bottom-center-text')
+                    ->group(__('External Links'))
+                    ->visible(function (): bool {
+                       return \Illuminate\Support\Facades\Auth::check();
+                    })
+                    ->sort(99),
+            ])
+            /* Mi Personalizacion */
+
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
@@ -39,7 +60,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 AccountWidget::class,
-                FilamentInfoWidget::class,
+                // FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
