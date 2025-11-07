@@ -61,8 +61,8 @@ return new class extends Migration
             $table->index('email', 'idx_client_email'); // Índice para búsquedas por email
 
             // Foreign Keys (asumiendo tabla users para administradores)
-            $table->foreign('created_by')->references('id')->on('users')->restrictOnDelete();
-            $table->foreign('updated_by')->references('id')->on('users')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->references('id')->on('users')->onUpdate('set null')->onDelete('set null');
+            $table->foreignId('updated_by')->nullable()->references('id')->on('users')->onUpdate('set null')->onDelete('set null');
         });
     }
 

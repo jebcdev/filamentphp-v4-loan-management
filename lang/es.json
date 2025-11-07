@@ -249,5 +249,19 @@
     "female": "Femenino",
 
     "admin": "Administrador",
-    "user": "Usuario estándar"
+    "user": "Usuario estándar",
+
+    "weekly": "Semanal",
+    "biweekly": "Quincenal",
+    "monthly": "Mensual",
+    "bimonthly": "Bimensual",
+    "trimesterly": "Trimestral",
+    "semiannual": "Semestral",
+    "annual": "Anual",
+
+    "draft": "Borrador",
+    "partially_paid": "Parcialmente pagado",
+    "overdue": "Vencido",
+    "restructured": "Reestructurado",
+    "written_off": "Castigado"
 }
