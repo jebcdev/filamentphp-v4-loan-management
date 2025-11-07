@@ -47,4 +47,44 @@ class User extends Authenticatable
             'role' => 'string',
         ];
     }
+
+    /**
+     * Relación con los clientes creados por el usuario.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function createdClients()
+    {
+        return $this->hasMany(Client::class, 'created_by');
+    }
+
+    /**
+     * Relación con los préstamos creados por el usuario.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function createdLoans()
+    {
+        return $this->hasMany(Loan::class, 'created_by');
+    }
+
+    /**
+     * Relación con las cuotas creadas por el usuario.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function createdInstallments()
+    {
+        return $this->hasMany(Installment::class, 'created_by');
+    }
+
+    /**
+     * Relación con los pagos creados por el usuario.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function createdPayments()
+    {
+        return $this->hasMany(Payment::class, 'created_by');
+    }
 }

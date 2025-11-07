@@ -122,14 +122,24 @@ class Installment extends Model
         return $this->hasMany(Installment::class, 'original_installment_id');
     }
 
-    // TODO: Implementar generación automática del número de cuota
-    // protected static function booted()
-    // {
-    //     static::creating(function ($installment) {
-    //         if (empty($installment->installment_number)) {
-    //             $maxNumber = static::where('loan_id', $installment->loan_id)->max('installment_number') ?? 0;
-    //             $installment->installment_number = $maxNumber + 1;
-    //         }
-    //     });
-    // }
+    /**
+     * Relación con los pagos aplicados a esta cuota.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+
+    protected static function booted()
+    {
+        static::creating(function ($installment) {
+            if (empty($installment->installment_number)) {
+                $maxNumber = static::where('loan_id', $installment->loan_id)->max('installment_number') ?? 0;
+                $installment->installment_number = $maxNumber + 1;
+            }
+        });
+    }
 }

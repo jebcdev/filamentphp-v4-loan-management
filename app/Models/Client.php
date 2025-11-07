@@ -62,4 +62,24 @@ class Client extends Model
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+
+    /**
+     * Relación con los préstamos del cliente.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function loans()
+    {
+        return $this->hasMany(Loan::class);
+    }
+
+    /**
+     * Relación con los pagos realizados por el cliente.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
 }

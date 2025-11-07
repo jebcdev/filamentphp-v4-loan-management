@@ -128,6 +128,26 @@ class Loan extends Model
         return $this->hasMany(Loan::class, 'original_loan_id');
     }
 
+    /**
+     * Relación con las cuotas del préstamo.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function installments()
+    {
+        return $this->hasMany(Installment::class);
+    }
+
+    /**
+     * Relación con los pagos aplicados al préstamo.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
     // TODO: Revisar el funcionamiento de este método
     protected static function booted()
     {
