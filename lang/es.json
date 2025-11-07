@@ -263,5 +263,9 @@
     "partially_paid": "Parcialmente pagado",
     "overdue": "Vencido",
     "restructured": "Reestructurado",
-    "written_off": "Castigado"
+    "written_off": "Castigado",
+
+    "pending": "Pendiente",
+    "rescheduled": "Reprogramada",
+    "forgiven": "Condonada"
 }
