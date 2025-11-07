@@ -267,5 +267,23 @@
 
     "pending": "Pendiente",
     "rescheduled": "Reprogramada",
-    "forgiven": "Condonada"
+    "forgiven": "Condonada",
+
+    "regular_installment": "Pago de cuota normal",
+    "principal_payment": "Abono extraordinario a capital",
+    "interest_payment": "Pago solo de intereses",
+    "arrears_payment": "Pago de mora",
+    "total_settlement": "Liquidación total del préstamo",
+    "extraordinary_payment": "Pago extraordinario",
+
+    "cash": "Efectivo",
+    "transfer": "Transferencia bancaria",
+    "check": "Cheque",
+    "card": "Tarjeta de débito/crédito",
+    "deposit": "Consignación bancaria",
+    "mobile_payment": "Pago móvil (PSE, Nequi, Daviplata, etc.)",
+
+    "confirmed": "Confirmado y aplicado",
+    "reversed": "Reversado",
+    "cancelled": "Anulado"
 }
