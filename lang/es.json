@@ -227,5 +227,27 @@
     "You are receiving this email because we received a password reset request for your account.": "Ha recibido este mensaje porque se solicitó un restablecimiento de contraseña para su cuenta.",
 
     "Loan Management": "Gestión de Préstamos",
-    "External Links": "Enlaces Externos"
+    "External Links": "Enlaces Externos",
+
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "blocked": "Bloqueado",
+
+    "citizenship_id_card": "Cédula de ciudadanía",
+    "identity_card": "Tarjeta de identidad",
+    "foreigner_id_card": "Cédula de extranjería",
+    "passport": "Pasaporte",
+    "tax_identification_number": "NIT (Número de Identificación Tributaria)",
+    "civil_registration": "Registro civil",
+    "unique_personal_identification_number": "NUIP (Número Único de Identificación Personal)",
+    "national_identity_document": "DNI (Documento Nacional de Identidad)",
+    "special_stay_permit": "Permiso especial de permanencia",
+    "temporary_protection_permit": "Permiso por protección temporal",
+    "other": "Otro",
+
+    "male": "Masculino",
+    "female": "Femenino",
+
+    "admin": "Administrador",
+    "user": "Usuario estándar"
 }
