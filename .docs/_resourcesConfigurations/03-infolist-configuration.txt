@@ -1,0 +1,136 @@
+/**
+ * Módulo: Esquema del Infolist de Categorías para Filament
+ *
+ * Este archivo define las entradas y secciones que se muestran en la vista
+ * de detalles (View) del recurso Category dentro del panel de Filament.
+ * Incluye visualización de imágenes, estados y metadatos.
+ *
+ * Se documenta en español siguiendo las políticas del proyecto.
+ *
+ * Exports:
+ *  - CategoryInfolist::configure(Schema): Schema
+ *
+ * Dependencies:
+ *  - Filament >= 3.0
+ *  - Laravel >= 10.0
+ *  - App\Models\Category
+ *
+ * Author: (añade tu nombre si lo deseas)
+ * Created: 2025-11-12
+ */
+
+<?php
+
+namespace App\Filament\Resources\Categories\Schemas;
+
+use App\Models\Category;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\Section; // Importación correcta para Infolists
+use Filament\Schemas\Schema;
+
+/**
+ * Clase que encapsula la configuración del infolist de categorías.
+ *
+ * Responsibilities:
+ *  - Declarar las entradas de información (text, image, icon)
+ *  - Organizar información en secciones para mejor legibilidad
+ *  - Configurar visibilidad condicional y formatos de datos
+ */
+class CategoryInfolist
+{
+    /**
+     * Configura la instancia de Filament\Schema\Schema usada en la página
+     * View del recurso Category.
+     *
+     * Muestra información detallada del registro en secciones organizadas,
+     * con soporte para imágenes, estados booleanos y metadatos.
+     *
+     * Args:
+     *  - $schema (Schema): instancia de Filament Schema que será mutada.
+     *
+     * Returns:
+     *  - Schema: la misma instancia configurada y retornada para encadenado.
+     *
+     * Note:
+     *  - Utiliza closures para visibilidad condicional basada en el estado del registro.
+     */
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+
+                // === SECCIÓN 1: DETALLES PRINCIPALES Y ESTADO ===
+                \Filament\Schemas\Components\Section::make('Información General')
+                    ->columns(2) // Divide la sección en 2 columnas para mejor uso del espacio
+                    ->description('Detalles principales y estado actual de la categoría.')
+                    ->schema([
+
+                        // Columna 1
+                        TextEntry::make('name')
+                            ->label('Nombre'),
+
+                        // Columna 2
+                        TextEntry::make('slug')
+                            ->label('Slug')
+                            ->copyable() // UX: Permite copiar el slug con un clic
+                            ->icon('heroicon-o-link'),
+
+                        // Imagen de la Categoría (Fix para que se muestre)
+                        ImageEntry::make('image')
+                            ->label('Imagen Principal')
+                            // 🔑 CLAVE: Especificar el disco para que pueda generar la URL pública
+                            ->disk('public')
+                            ->height(150) // UX: Le da un tamaño decente para verse bien
+                            ->width('auto')
+                            ->columnSpan(1) // Ocupa media columna
+                            ->placeholder('Sin imagen.'),
+
+                        // Estado Activo (Mejorado con Iconos y Colores)
+                        IconEntry::make('is_active')
+                            ->label('Estado de Visibilidad')
+                            ->columnSpan(1)
+                            ->boolean()
+                            ->trueIcon('heroicon-o-check-badge')
+                            ->trueColor('success') // Color verde para activo
+                            ->falseIcon('heroicon-o-x-circle')
+                            ->falseColor('danger'), // Color rojo para inactivo
+                    ]),
+
+                // === SECCIÓN 2: DESCRIPCIÓN (Ancho completo) ===
+                \Filament\Schemas\Components\Section::make('Descripción')
+                    ->schema([
+                        TextEntry::make('description')
+                            ->label('Contenido Detallado')
+                            ->markdown() // Si permites Markdown en la descripción, esto lo renderiza
+                            ->placeholder('No se proporcionó una descripción detallada.')
+                            ->columnSpanFull(),
+                    ]),
+
+                // === SECCIÓN 3: METADATA DEL SISTEMA ===
+                \Filament\Schemas\Components\Section::make('Metadata')
+                    ->columns(3) // Usamos 3 columnas para optimizar espacio en el pie
+                    ->collapsible() // UX: Permite al usuario colapsar la sección menos importante
+                    ->schema([
+                        TextEntry::make('created_at')
+                            ->label('Fecha de Creación')
+                            ->dateTime('d/m/Y H:i') // Formato de fecha localizado
+                            ->placeholder('-'),
+
+                        TextEntry::make('updated_at')
+                            ->label('Última Modificación')
+                            ->dateTime('d/m/Y H:i')
+                            ->placeholder('-'),
+
+                        // Solo visible si el registro está en la papelera (Soft Deletes)
+                        TextEntry::make('deleted_at')
+                            ->label('Fecha de Eliminación')
+                            ->dateTime('d/m/Y H:i')
+                            ->badge() // Se muestra como una etiqueta destacada
+                            ->color('danger')
+                            ->visible(fn(Category $record): bool => $record->trashed()),
+                    ]),
+            ]);
+    }
+}

@@ -1,0 +1,140 @@
+/**
+ * Módulo: Configuración Personalizada de Recursos Filament
+ *
+ * Este archivo contiene métodos estáticos para personalizar la apariencia y
+ * comportamiento de un recurso en el panel de administración de Filament.
+ * Incluye configuración de navegación, etiquetas, grupos y badges.
+ *
+ * Se documenta en español siguiendo las políticas del proyecto.
+ *
+ * Exports:
+ *  - getNavigationLabel(): string
+ *  - getModelLabel(): string
+ *  - getPluralModelLabel(): string
+ *  - getNavigationGroup(): ?string
+ *  - getNavigationGroupSort(): ?int
+ *  - getNavigationSort(): ?int
+ *  - getNavigationBadge(): ?string
+ *  - getNavigationBadgeTooltip(): ?string
+ *
+ * Dependencies:
+ *  - Filament >= 3.0
+ *  - Laravel >= 10.0
+ *
+ * Author: (añade tu nombre si lo deseas)
+ * Created: 2025-11-12
+ */
+
+php artisan make:filament-resource --generate --view --soft-deletes
+
+    /*  Inicio de Personalización  */
+
+    /**
+     * Obtiene la etiqueta de navegación para el recurso.
+     *
+     * Esta etiqueta se muestra en el menú lateral del panel de Filament.
+     * Se utiliza para identificar el recurso en la navegación.
+     *
+     * @return string La etiqueta de navegación traducida.
+     */
+    public static function getNavigationLabel(): string
+    {
+        // Define el nombre en singular para la navegación lateral
+        $text=__('Users');
+        return $text;
+    }
+
+    // Opcional: Cambiar los nombres usados en los títulos y Breadcrumbs
+    /**
+     * Obtiene la etiqueta del modelo en singular.
+     *
+     * Se utiliza en títulos como "Crear [Modelo]" y en breadcrumbs.
+     *
+     * @return string La etiqueta del modelo traducida.
+     */
+    public static function getModelLabel(): string
+    {
+        $text=__('User');
+        return $text; // Usado en 'Crear'
+    }
+
+    /**
+     * Obtiene la etiqueta del modelo en plural.
+     *
+     * Se utiliza en títulos como "Lista de [Modelos]" y en navegación.
+     *
+     * @return string La etiqueta del modelo plural traducida.
+     */
+    public static function getPluralModelLabel(): string
+    {
+        $text=__('Users');
+        return $text; // Usado en el título principal 'Lista de ...'
+    }
+
+    /**
+     * Obtiene el grupo de navegación para el recurso.
+     *
+     * Los recursos se agrupan en el menú lateral bajo este grupo.
+     *
+     * @return string|null El nombre del grupo de navegación traducido.
+     */
+    public static function getNavigationGroup(): ?string
+    {
+        $text=__('General Settings');
+        return $text;
+    }
+
+    /**
+     * Obtiene el orden de clasificación del grupo de navegación.
+     *
+     * Determina el orden en que aparecen los grupos en el menú lateral.
+     * Números más bajos aparecen primero.
+     *
+     * @return int|null El orden de clasificación del grupo.
+     */
+    public static function getNavigationGroupSort(): ?int
+    {
+
+        return 1;
+    }
+
+    /**
+     * Obtiene el orden de clasificación del recurso dentro de su grupo.
+     *
+     * Determina el orden en que aparecen los recursos dentro de un grupo.
+     * Números más bajos aparecen primero.
+     *
+     * @return int|null El orden de clasificación del recurso.
+     */
+    public static function getNavigationSort(): ?int
+    {
+
+        return 1;
+    }
+
+    /**
+     * Obtiene el badge de navegación para el recurso.
+     *
+     * Muestra un contador o indicador junto al nombre del recurso en el menú.
+     *
+     * @return string|null El valor del badge (generalmente un conteo).
+     */
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
+    /**
+     * Obtiene el tooltip del badge de navegación.
+     *
+     * Proporciona información adicional cuando se pasa el mouse sobre el badge.
+     *
+     * @return string|null El texto del tooltip traducido.
+     */
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        $text=__('Total Users Registered');
+        return $text;
+    }
+
+    /*  Fin de Personalización  */

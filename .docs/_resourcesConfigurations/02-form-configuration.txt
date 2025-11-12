@@ -1,0 +1,122 @@
+/**
+ * Módulo: Esquema del Formulario de Categorías para Filament
+ *
+ * Este archivo define los campos y secciones que se muestran en el formulario
+ * (Create/Edit) del recurso Category dentro del panel de Filament.
+ * Incluye validaciones, interacciones dinámicas y configuración de subida de archivos.
+ *
+ * Se documenta en español siguiendo las políticas del proyecto.
+ *
+ * Exports:
+ *  - CategoryForm::configure(Schema): Schema
+ *
+ * Dependencies:
+ *  - Filament >= 3.0
+ *  - Laravel >= 10.0
+ *  - Illuminate\Support\Str
+ *
+ * Author: (añade tu nombre si lo deseas)
+ * Created: 2025-11-12
+ */
+
+<?php
+
+namespace App\Filament\Resources\Categories\Schemas;
+
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
+
+/**
+ * Clase que encapsula la configuración del formulario de categorías.
+ *
+ * Responsibilities:
+ *  - Declarar los campos del formulario (inputs, toggles, uploads)
+ *  - Configurar validaciones y comportamientos dinámicos
+ *  - Organizar campos en secciones para mejor UX
+ */
+class CategoryForm
+{
+    /**
+     * Configura la instancia de Filament\Schema\Schema usada en las páginas
+     * Create y Edit del recurso Category.
+     *
+     * Incluye lógica para generar automáticamente el slug a partir del nombre,
+     * validaciones de unicidad y configuración de subida de imágenes.
+     *
+     * Args:
+     *  - $schema (Schema): instancia de Filament Schema que será mutada.
+     *
+     * Returns:
+     *  - Schema: la misma instancia configurada y retornada para encadenado.
+     *
+     * Note:
+     *  - Utiliza live updates para interacciones dinámicas sin recargar la página.
+     */
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Información Básica')
+                    // Divide los campos internos en 2 columnas
+                    ->columns(2)
+                    ->description('Detalles principales de la categoría y su estado.')
+                    ->schema([
+                        // 1. CAMPO NAME (El disparador)
+                        TextInput::make('name')
+                            ->label('Nombre')
+                            ->required()
+                            ->autofocus()
+                            // 🚀 Clave 1: Escuchar cambios al perder el foco
+                            ->live(onBlur: true)
+                            // 🚀 Clave 2: Ejecutar la lógica después de que el estado cambie
+                            ->afterStateUpdated(function (string $operation, $state, TextInput $component) {
+                                // Obtiene el componente 'slug' y le establece el valor generado
+                                $component
+                                    ->getContainer()
+                                    ->getComponent('slug')
+                                    ->state(Str::slug($state));
+                            }),
+
+                        // 2. CAMPO SLUG (El receptor)
+                        TextInput::make('slug')
+                            ->label('Slug')
+                            ->required()
+                            ->unique(ignoreRecord: true) // Asegura unicidad en la BD
+                            // 🚀 Clave 3: Lo hace de solo lectura para el usuario
+                            ->readOnly()
+                            ->helperText('Se genera automáticamente a partir del nombre.'),
+
+                        // Se muestra en la segunda columna, debajo del slug
+                        Toggle::make('is_active')
+                            ->label('Activa?') // UX: Texto más descriptivo que 'Activo'
+                            ->inline(false) // Muestra el toggle en una línea separada
+                            ->default(true), // BUENA PRÁCTICA: Asumir que es activa por defecto
+
+                        // Descripción a ancho completo (debajo de las 2 columnas)
+                        Textarea::make('description')
+                            ->label('Descripción Detallada')
+                            ->columnSpanFull() // Ocupa el ancho completo (1/1)
+                            ->maxLength(500) // BUENA PRÁCTICA: Limitar la entrada
+                            ->rows(4), // UX: Aumentar la altura para mejor escritura
+                    ]),
+
+                Section::make('Contenido Multimedia')
+                    ->description('Sube la imagen principal de la categoría (banners, iconos, etc).')
+                    ->schema([
+                        FileUpload::make('image')
+                            ->label('Imagen Principal')
+                            ->image()
+                            ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/gif'])
+                            ->disk('public') // Asegurar que usa el disco público
+                            ->directory('category-images') // BUENA PRÁCTICA: Organizar las subidas
+                            ->maxSize(2048) // BUENA PRÁCTICA: Limitar tamaño (2MB)
+                    ])
+                    ->collapsible(), // UX: Permite al usuario colapsar la sección si es muy larga
+            ]);
+    }
+}

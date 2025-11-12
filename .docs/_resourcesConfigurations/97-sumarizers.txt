@@ -1,0 +1,37 @@
+/**
+ * Módulo: Configuración de Sumadores para Columnas en Filament
+ *
+ * Este archivo muestra cómo configurar sumadores (summarizers) en una columna
+ * de tabla para calcular totales y diferencias basadas en condiciones.
+ *
+ * Se documenta en español siguiendo las políticas del proyecto.
+ *
+ * Dependencies:
+ *  - Filament >= 3.0
+ *  - Laravel >= 10.0
+ *  - Illuminate\Database\Eloquent\Builder
+ *  - Illuminate\Support\Facades\DB
+ *
+ * Author: (añade tu nombre si lo deseas)
+ * Created: 2025-11-12
+ */
+
+// Configuración de columna con sumadores para ingresos y gastos
+TextColumn::make('amount')
+    ->label(__('Amount'))
+    ->numeric()
+    ->summarize([
+        // Sumador para total de ingresos
+        Sum::make()
+            ->label('Total Ingresos')
+            ->query(fn(Builder $query) => $query->where('type', 'income')),
+        // Sumador para total de gastos
+        Sum::make()
+            ->label('Total Gastos')
+            ->query(fn(Builder $query) => $query->where('type', 'expense')),
+        // Sumador personalizado para diferencia
+        Summarizer::make()
+            ->label('Diferencia (Ingresos - Gastos)')
+            ->using(fn(Builder $query) => $query->sum(DB::raw("CASE WHEN type = 'income' THEN amount ELSE -amount END"))),
+    ])
+    ->searchableAndSortable(),

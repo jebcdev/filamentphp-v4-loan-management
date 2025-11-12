@@ -1,0 +1,123 @@
+/**
+ * Módulo: Configuraciones Antiguas de Recursos Filament (Referencia)
+ *
+ * Este archivo contiene configuraciones antiguas o alternativas para recursos
+ * de Filament, incluyendo navegación, badges, búsqueda global y más.
+ * Usado como referencia para migraciones o alternativas.
+ *
+ * Se documenta en español siguiendo las políticas del proyecto.
+ *
+ * Dependencies:
+ *  - Filament >= 3.0
+ *  - Laravel >= 10.0
+ *
+ * Author: (añade tu nombre si lo deseas)
+ * Created: 2025-11-12
+ */
+
+    /* Configuraciones de navegación y etiquetas */
+
+    protected static ?int $navigationSort = 2; // Orden en el menú de navegación
+
+    protected static ?string $navigationGroup = 'Tienda'; // Grupo en el menú lateral
+
+    protected static ?string $navigationLabel = 'Marcas'; // Etiqueta de navegación
+
+    protected static ?string $modelLabel = 'Marcas'; // Etiqueta del modelo
+
+    protected static ?string $recordTitleAttribute = 'name'; // Atributo para título de registros (búsqueda global)
+
+    protected static ?string $activeNavigationIcon= 'heroicon-o-check-badge'; // Icono cuando la sección está activa
+
+    /**
+     * Obtiene el badge de navegación mostrando el conteo total.
+     *
+     * @return string|null El número total de registros
+     */
+    public static function getNavigationBadge(): ?string
+    {
+        return static::getModel()::count();
+    }
+
+    /**
+     * Obtiene el color del badge basado en condiciones.
+     *
+     * @return string|null Color del badge ('danger' si >10, 'primary' otherwise)
+     */
+    public static function getNavigationBadgeColor(): ?string
+    {
+        $proccecingOrders = static::getModel()::where('order_status_id',2)->count();
+
+        return $proccecingOrders > 10 ? 'danger' : 'primary';
+    }
+
+    /**
+     * Define los atributos buscables globalmente.
+     *
+     * @return array Lista de atributos para búsqueda global
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return [
+            'name',
+            'slug',
+            'url',
+            'description',
+        ];
+    }
+
+    /**
+     * Define los detalles mostrados en resultados de búsqueda global.
+     *
+     * @param Model $record El registro encontrado
+     * @return array Detalles del registro para mostrar
+     */
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'name' => $record->name,
+            'slug' => $record->slug,
+            'url' => $record->url,
+            'description' => $record->description,
+
+        ];
+    }
+
+    public static bool $shouldRegisterNavigation = false; // Desactiva el registro en el menú de navegación
+
+    // Para mostrar secciones solo en ciertas páginas (ej. solo en create)
+    Section::make('Password Setup')->schema([
+
+        Forms\Components\TextInput::make('password')
+            ->password()
+            ->columnSpanFull()
+            ->required(),
+
+    ])->visibleOn(['create']), // Solo visible en la página de creación
+
+    // Agrupar acciones en la tabla
+    ->actions(
+        [
+            Tables\Actions\ActionGroup::make([
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ViewAction::make(),
+            ]),
+        ],
+        position: Tables\Enums\ActionsPosition::BeforeColumns
+    )
+
+    // Ordenar la query por defecto (ej. por ID descendente)
+    /**
+     * Obtiene la query Eloquent con ordenamiento por defecto.
+     *
+     * @return Builder Query ordenada por ID descendente
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ])
+            ->orderBy('id', 'desc');
+    }

@@ -1,0 +1,154 @@
+<?php
+
+/**
+ * Módulo: Esquema de la tabla de Categorías para Filament
+ *
+ * Este archivo define las columnas, filtros y acciones que se muestran
+ * en el listado (List) del recurso Category dentro del panel de Filament.
+ *
+ * Se documenta en español siguiendo las políticas del proyecto.
+ *
+ * Exports:
+ *  - CategoriesTable::configure(Table): Table
+ *
+ * Author: (añade tu nombre si lo deseas)
+ * Created: 2025-10-04
+ */
+
+namespace App\Filament\Resources\Categories\Tables;
+
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
+use Filament\Tables\Enums\RecordActionsPosition;
+use Filament\Actions\ActionGroup;
+
+/**
+ * Clase que encapsula la configuración de la tabla de categorías.
+ *
+ * Responsibilities:
+ *  - Declarar las columnas que se muestran en la lista
+ *  - Registrar filtros (p. ej. TrashedFilter para soft deletes)
+ *  - Definir acciones individuales y acciones masivas (bulk actions)
+ */
+class CategoriesTable
+{
+    /**
+     * Configura la instancia de Filament\Tables\Table usada en el List page
+     * del recurso Category.
+     *
+     * Args:
+     *  - $table (Table): instancia de Filament Table que será mutada.
+     *
+     * Returns:
+     *  - Table: la misma instancia configurada y retornada para encadenado.
+     *
+     * Note:
+     *  - No realiza ninguna operación sobre la base de datos; solo describe UI.
+     */
+    public static function configure(Table $table): Table
+    {
+        // Devuelve la tabla configurada con columnas, filtros y acciones
+        return $table
+            ->columns([
+                // Imagen representativa de la categoría.
+                // NOTA: Las imágenes se almacenan en storage/app/public/category-images/
+                // y son accesibles via el symlink public/storage (crear con: php artisan storage:link)
+                // La columna ImageColumn lee el valor de la BD (que incluye la ruta completa: 'category-images/archivo.jpg')
+                ImageColumn::make('image')
+                    ->label('Imagen')
+                    ->disk('public') // Disco de almacenamiento público
+                    ->circular(), // Hace la imagen circular (opcional, puedes quitar si prefieres cuadrada)
+
+                // Columna principal: nombre de la categoría.
+                // - searchable: permite buscar globalmente por este campo.
+                // - sortable: permite ordenar la lista por este campo.
+                TextColumn::make('name')
+                    ->label('Nombre')
+                    ->searchable()
+                    ->sortable(),
+                // Slug usado típicamente en URLs. También es buscable y ordenable
+                // para facilitar la administración cuando hay muchas categorías.
+                TextColumn::make('slug')
+                    ->label('Slug')
+                    ->searchable()
+                    ->sortable(),
+                // Indicador booleano de estado activo/inactivo.
+                // Se muestra como icono (check/cross) y es sortable para agrupar
+                // fácilmente registros activos o inactivos.
+                IconColumn::make('is_active')
+                    ->label('Activo')
+                    ->boolean()
+                    ->sortable(),
+                // Metadatos de tiempo: creación. Se marca como searchable porque
+                // Filament permite búsquedas textuales sobre la representación
+                // formateada; para búsquedas por rango usar un filtro DateRange.
+                TextColumn::make('created_at')
+                    ->label('Creado')
+                    ->dateTime()
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                // Fecha de última actualización. Igual que created_at, es útil
+                // mostrarla ocultable y permitir ordenación.
+                TextColumn::make('updated_at')
+                    ->label('Actualizado')
+                    ->dateTime()
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                // Columna de borrado suave (soft deletes). Se muestra solo cuando
+                // es pertinente y permite ordenar por fecha de eliminación.
+                TextColumn::make('deleted_at')
+                    ->label('Eliminado')
+                    ->dateTime()
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                // Filtro para ver registros eliminados (soft deletes)
+                TrashedFilter::make(),
+            ])
+            ->recordActions([
+                \Filament\Actions\ActionGroup::make([
+                    ViewAction::make()->url(fn($record) => CategoryResource::getUrl('view', ['record' => $record]))->label(__('View')),
+                    EditAction::make()->label(__('Edit')),
+                    \Filament\Actions\DeleteAction::make()->label(__('Delete')),
+                    \Filament\Actions\RestoreAction::make()->label(__('Restore')),
+                    \Filament\Actions\ForceDeleteAction::make()->label(__('Force Delete')),
+                ]),
+            ], position: \Filament\Tables\Enums\RecordActionsPosition::BeforeColumns)
+            ->toolbarActions([
+                // Acciones masivas agrupadas: eliminar, forzar eliminación,
+                // restaurar. Se usan las implementaciones nativas de Filament.
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
+                ]),
+            ]);
+    }
+}
+
+
+
+                TextColumn::make('document_type')
+                    ->label(__('Document Type'))
+                    ->searchableAndSortable()
+                    ->badge()
+                    ->formatStateUsing(function ($state) {
+                        return __("{$state}");
+                    }) // Traduce el valor del enum
+                    ->toggleable(isToggledHiddenByDefault: true),

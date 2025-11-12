@@ -1,0 +1,89 @@
+/**
+ * Módulo: Página de Listado de Categorías para Filament
+ *
+ * Este archivo define la página de listado (ListRecords) del recurso Category,
+ * incluyendo pestañas para filtrar categorías por estado y acciones del header.
+ *
+ * Se documenta en español siguiendo las políticas del proyecto.
+ *
+ * Exports:
+ *  - ListCategories: clase de página de listado
+ *
+ * Dependencies:
+ *  - Filament >= 3.0
+ *  - Laravel >= 10.0
+ *  - App\Filament\Resources\Categories\CategoryResource
+ *
+ * Author: (añade tu nombre si lo deseas)
+ * Created: 2025-11-12
+ */
+
+<?php
+
+namespace App\Filament\Resources\Categories\Pages;
+
+use App\Filament\Resources\Categories\CategoryResource;
+use Filament\Actions\CreateAction;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Tabs\Tab;
+use Illuminate\Database\Eloquent\Builder;
+
+/**
+ * Página de listado de categorías con pestañas de filtrado.
+ *
+ * Esta página muestra todas las categorías en formato de tabla
+ * y permite filtrarlas mediante pestañas (tabs) por su estado:
+ * - Todas: sin filtro
+ * - Activas: solo categorías con is_active = true
+ * - Inactivas: solo categorías con is_active = false
+ */
+class ListCategories extends ListRecords
+{
+    protected static string $resource = CategoryResource::class;
+
+    /**
+     * Define las acciones disponibles en el header de la página.
+     *
+     * @return array Array de acciones (CreateAction para crear categorías)
+     */
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make(),
+        ];
+    }
+
+    /**
+     * Define las pestañas (tabs) para filtrar el listado de categorías.
+     *
+     * Cada pestaña aplica un filtro diferente sobre la query base:
+     * - 'all': Muestra todas las categorías sin filtro
+     * - 'active': Filtra solo las categorías activas (is_active = true)
+     * - 'inactive': Filtra solo las categorías inactivas (is_active = false)
+     *
+     * @return array Array asociativo de pestañas [clave => Tab]
+     */
+    public function getTabs(): array
+    {
+        return [
+            // Pestaña "Todas" - sin filtro, muestra todos los registros
+            'all' => Tab::make('Todas')
+                ->icon('heroicon-o-list-bullet')
+                ->badge(fn() => CategoryResource::getModel()::count()),
+
+            // Pestaña "Activas" - solo categorías activas
+            'active' => Tab::make('Activas')
+                ->icon('heroicon-o-check-circle')
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('is_active', true))
+                ->badge(fn() => CategoryResource::getModel()::where('is_active', true)->count())
+                ->badgeColor('success'),
+
+            // Pestaña "Inactivas" - solo categorías inactivas
+            'inactive' => Tab::make('Inactivas')
+                ->icon('heroicon-o-x-circle')
+                ->modifyQueryUsing(fn(Builder $query) => $query->where('is_active', false))
+                ->badge(fn() => CategoryResource::getModel()::where('is_active', false)->count())
+                ->badgeColor('danger'),
+        ];
+    }
+}

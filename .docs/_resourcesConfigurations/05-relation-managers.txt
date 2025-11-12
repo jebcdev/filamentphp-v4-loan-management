@@ -1,0 +1,70 @@
+/**
+ * Módulo: Relation Manager para Estados de Países en Filament
+ *
+ * Este archivo define un RelationManager para gestionar la relación
+ * entre países y estados, permitiendo crear y listar estados desde
+ * la vista de un país específico.
+ *
+ * Se documenta en español siguiendo las políticas del proyecto.
+ *
+ * Exports:
+ *  - StatesRelationManager: clase del relation manager
+ *
+ * Dependencies:
+ *  - Filament >= 3.0
+ *  - Laravel >= 10.0
+ *  - App\Filament\Resources\Countries\CountryResource
+ *
+ * Author: (añade tu nombre si lo deseas)
+ * Created: 2025-11-12
+ */
+
+php artisan make:filament-relation-manager --soft-deletes
+
+<?php
+
+namespace App\Filament\Resources\Countries\RelationManagers;
+
+use App\Filament\Resources\Countries\CountryResource;
+use Filament\Actions\CreateAction;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables\Table;
+
+/**
+ * Clase que gestiona la relación de estados para un país.
+ *
+ * Responsibilities:
+ *  - Definir la relación con el modelo padre (país)
+ *  - Configurar la tabla de estados relacionados
+ *  - Permitir acciones como crear nuevos estados
+ */
+class StatesRelationManager extends RelationManager
+{
+    protected static string $relationship = 'states';
+
+    // Cambia el título aquí
+    protected static ?string $title = 'Estados';
+
+    // O usa esto para el label en plural/singular
+    protected static ?string $modelLabel = 'Estado';
+    protected static ?string $pluralModelLabel = 'Estados';
+
+    protected static ?string $relatedResource = CountryResource::class;
+
+    /**
+     * Configura la tabla para mostrar los estados relacionados.
+     *
+     * Args:
+     *  - $table (Table): instancia de Filament Table para configurar.
+     *
+     * Returns:
+     *  - Table: la tabla configurada con acciones del header.
+     */
+    public function table(Table $table): Table
+    {
+        return $table
+            ->headerActions([
+                CreateAction::make(),
+            ]);
+    }
+}

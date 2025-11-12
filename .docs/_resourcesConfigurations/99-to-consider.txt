@@ -1,0 +1,84 @@
+/**
+ * Módulo: Consideraciones y Snippets Útiles para Filament
+ *
+ * Este archivo contiene varios snippets y consejos útiles para el desarrollo
+ * con Filament, incluyendo macros, asignación de usuario actual y redirecciones.
+ *
+ * Se documenta en español siguiendo las políticas del proyecto.
+ *
+ * Dependencies:
+ *  - Filament >= 3.0
+ *  - Laravel >= 10.0
+ *
+ * Author: (añade tu nombre si lo deseas)
+ * Created: 2025-11-12
+ */
+
+// ==============================================================================
+// COMPONENTES ADICIONALES
+// ==============================================================================
+
+// ToggleButton: Componente para toggles en formularios
+// Clusters: Para agrupar recursos relacionados
+
+// ==============================================================================
+// MACROS EN APPSERVICEPROVIDER
+// ==============================================================================
+
+/**
+ * Método boot del AppServiceProvider con macro para columnas.
+ *
+ * Registra un macro para TextColumn que combina búsqueda y ordenación.
+ *
+ * @return void
+ */
+public function boot(): void
+{
+    \Filament\Tables\Columns\TextColumn::macro('searchableAndSortable', function () {
+        /** @var \Filament\Tables\Columns\TextColumn $this */
+        return $this->searchable()->sortable();
+    });
+}
+
+// ==============================================================================
+// ASIGNAR USUARIO ACTUAL AL CREAR REGISTROS
+// ==============================================================================
+
+/**
+ * Clase CreateCategory que asigna el usuario actual al crear.
+ *
+ * Útil cuando necesitas trackear quién creó el registro.
+ */
+class CreateCategory extends CreateRecord
+{
+    protected static string $resource = CategoryResource::class;
+
+    /**
+     * Maneja la creación del registro asignando el user_id actual.
+     *
+     * @param array $data Datos del formulario
+     * @return Model El modelo creado
+     */
+    protected function handleRecordCreation(array $data): Model
+    {
+        // Asigna el ID del usuario autenticado al campo user_id
+        $data['user_id'] = Auth::id(); // Asumiendo que tienes un campo user_id en la tabla categories
+        return static::getModel()::create($data);
+    }
+}
+
+// ==============================================================================
+// REDIRECCIÓN DESPUÉS DE ACCIONES
+// ==============================================================================
+
+/**
+ * Método para redirigir al index después de una acción.
+ *
+ * Sobrescribe este método en páginas de Create o Edit para cambiar el comportamiento por defecto.
+ *
+ * @return string URL de redirección
+ */
+protected function getRedirectUrl(): string
+{
+    return $this->getResource()::getUrl('index');
+}
