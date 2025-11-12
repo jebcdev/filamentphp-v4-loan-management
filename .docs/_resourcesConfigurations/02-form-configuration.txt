@@ -115,6 +115,30 @@ class CategoryForm
                             ->disk('public') // Asegurar que usa el disco público
                             ->directory('category-images') // BUENA PRÁCTICA: Organizar las subidas
                             ->maxSize(2048) // BUENA PRÁCTICA: Limitar tamaño (2MB)
+
+                        Select::make('role')
+                            ->options(
+                                array_combine(
+                                    Role::values(),
+                                    array_map(fn($value) => __($value), Role::values())
+                                )
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->default('client')
+                            ->required()
+                            ->label(__('Role')),
+
+                            ToggleButtons::make('movement_type')
+                        ->options(
+                            array_combine(
+                                CashMovementType::values(),
+                                array_map(fn($value) => __($value), CashMovementType::values())
+                            )
+                        )
+                        ->required()
+                        ->grouped()
+                        ->label(__('Movement Type')),
                     ])
                     ->collapsible(), // UX: Permite al usuario colapsar la sección si es muy larga
             ]);

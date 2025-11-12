@@ -45,12 +45,10 @@ return new class extends Migration
             $table->enum('status', ClientStatus::values())->default(ClientStatus::active); // Estado del cliente en el sistema
 
             // Additional Information
-            $table->json('personal_references')->nullable(); // Referencias personales (JSON: nombre, teléfono, parentesco)
+            $table->text('personal_references')->nullable(); // Referencias personales (text: nombre, teléfono, parentesco)
             $table->text('notes')->nullable(); // Observaciones o notas adicionales sobre el cliente
 
             // Audit Fields
-            $table->foreignId('created_by'); // Usuario administrador que creó el registro
-            $table->foreignId('updated_by')->nullable(); // Usuario administrador que actualizó el registro por última vez
             $table->timestamps(); // created_at (fecha de creación) y updated_at (fecha de última modificación)
             $table->softDeletes(); // deleted_at (fecha de eliminación suave)
 
