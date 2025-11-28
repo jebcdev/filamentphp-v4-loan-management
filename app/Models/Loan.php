@@ -57,8 +57,8 @@ class Loan extends Model
      * Define cómo se deben convertir los valores al accederlos desde la base de datos.
      */
     protected $casts = [
-        'payment_frequency' => 'string',    // Enum para frecuencia de pago
-        'status' => 'string',                  // Enum para estado del préstamo
+        'payment_frequency' => PaymentFrequency::class,    // Enum para frecuencia de pago
+        'status' => PaymentStatus::class,                  // Enum para estado del préstamo
         'disbursement_date' => 'date',                     // Fecha de desembolso
         'first_due_date' => 'date',                        // Fecha de primera cuota
         'settlement_date' => 'date',                       // Fecha de liquidación

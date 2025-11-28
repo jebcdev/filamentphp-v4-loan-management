@@ -35,13 +35,14 @@ enum PaymentStatus : string
     case overdue = 'overdue';       // Vencido (con cuotas en mora)
     case restructured = 'restructured'; // Reestructurado
     case written_off = 'written_off';   // Castigado (pérdida)
+    case completed = 'completed'; // Completado (sin saldo pendiente)
 
     public static function names(): array
     {
         return array_map(fn($case) => $case->name, self::cases());
     }
 
-    public static function values(): array
+    public static function values()
     {
         return array_map(fn($case) => $case->value, self::cases());
     }

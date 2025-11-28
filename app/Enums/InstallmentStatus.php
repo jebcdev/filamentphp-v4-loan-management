@@ -39,7 +39,7 @@ enum InstallmentStatus : string
         return array_map(fn($case) => $case->name, self::cases());
     }
 
-    public static function values(): array
+    public static function values()
     {
         return array_map(fn($case) => $case->value, self::cases());
     }

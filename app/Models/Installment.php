@@ -64,12 +64,12 @@ class Installment extends Model
         'interest_paid_amount' => 'decimal:2',          // Interés pagado
         'other_charges_paid_amount' => 'decimal:2',     // Otros cargos pagados
         'arrears_amount' => 'decimal:2',                // Monto de mora
-        'arrears_paid_amount' => 'decimal:2',           // Mora pagada
+        'arrears_paid_amount' => 'decimal:2',     // Mora pagada
         'pending_balance' => 'decimal:2',               // Saldo pendiente (calculado)
         'days_overdue' => 'integer',                    // Días de mora
         'installment_number' => 'integer',              // Número de cuota
         'was_rescheduled' => 'boolean',                 // Indicador de reprogramación
-        'status' => 'string',           // Enum para estado de la cuota
+        'status' => InstallmentStatus::class,           // Enum para estado de la cuota
     ];
 
     /**
